@@ -22,20 +22,24 @@ int main(){
   char* input = (char*) malloc(sizeof(char)*STRING_SIZE);
   size_t arrlen = 1000;
   int num1[arrlen], num2[arrlen];
-  uint i = 0, j = 0; 
+  uint i = 0; 
 
   if (fptr != NULL){
     while (fgets(input, STRING_SIZE, fptr)){
-      if(i < arrlen && j < arrlen) parseString(input, &num1[i++], &num2[j++]);
+      if(i < arrlen) {
+        parseString(input, &num1[i], &num2[i]);
+        i++;
+      }
     }
   } 
   fclose(fptr);
+  free(input);
 
   mergeSort(num1, 0, i-1);
-  mergeSort(num2, 0, j-1);
+  mergeSort(num2, 0, i-1);
 
-  int distance = getDistance(num1, num2, arrlen);
-  int similarityScore = getSimilarityScore(num1, num2, arrlen);
+  int distance = getDistance(num1, num2, i);
+  int similarityScore = getSimilarityScore(num1, num2, i);
   printf("Distance: %d\n", distance);
   printf("Similarity Score: %d\n", similarityScore);
 
@@ -52,6 +56,7 @@ void parseString(char* string, int* num1, int* num2){
 }
 
 int max(int* arr, size_t len){
+  if (len == 0) return -1;
   int max = 0;
   for (uint i = 0; i < len; i++){
     if (arr[i] > max) max = arr[i];
@@ -60,7 +65,7 @@ int max(int* arr, size_t len){
 }
 
 int* frequency(int* arr, size_t len){
-  int* freqArr = (int*) malloc(sizeof(int) * (max(arr, len)+1));
+  int* freqArr = (int*) calloc((max(arr, len)+1), sizeof(int));
   for (uint i = 0; i < len; i++){
     freqArr[arr[i]] += 1;
   }
@@ -73,7 +78,7 @@ void merge(int* arr, uint left, uint mid, uint right){
 
   int L[len_1], R[len_2];
   for (uint i = 0; i < len_1; i++) L[i] = arr[left + i];
-  for (uint i = 0; i < len_1; i++) R[i] = arr[mid + i + 1];
+  for (uint i = 0; i < len_2; i++) R[i] = arr[mid + i + 1];
 
   uint i = 0, j = 0, k = left;
   while (i < len_1 && j < len_2){
@@ -97,7 +102,7 @@ void mergeSort(int* arr, uint left, uint right){
 int getDistance(int* arr1, int* arr2, size_t len){
   int sum = 0;
   for (uint i = 0; i < len; i++){
-    sum += (int) fabs((double) (arr1[i] - arr2[i]));
+    sum += abs((arr1[i] - arr2[i]));
   }
   return sum;
 }
