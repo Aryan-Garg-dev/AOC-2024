@@ -4,7 +4,43 @@
 #include <math.h>
 
 #define KB 1024
+#define STRING_SIZE 128
 typedef unsigned int uint;
+
+void parseString(char* string, int* num1, int* num2);
+int max(int* arr, size_t len);
+int* frequency(int* arr, size_t len);
+void merge(int* arr, uint left, uint mid, uint right);
+void mergeSort(int* arr, uint left, uint right);
+int getDistance(int* arr1, int* arr2, size_t len);
+int getSimilarityScore(int* arr1, int* arr2, size_t len);
+
+int main(){
+  FILE* fptr;
+  fptr = fopen("./input.txt", "r");
+
+  char* input = (char*) malloc(sizeof(char)*STRING_SIZE);
+  size_t arrlen = 1000;
+  int num1[arrlen], num2[arrlen];
+  uint i = 0, j = 0; 
+
+  if (fptr != NULL){
+    while (fgets(input, STRING_SIZE, fptr)){
+      if(i < arrlen && j < arrlen) parseString(input, &num1[i++], &num2[j++]);
+    }
+  } 
+  fclose(fptr);
+
+  mergeSort(num1, 0, i-1);
+  mergeSort(num2, 0, j-1);
+
+  int distance = getDistance(num1, num2, arrlen);
+  int similarityScore = getSimilarityScore(num1, num2, arrlen);
+  printf("Distance: %d\n", distance);
+  printf("Similarity Score: %d\n", similarityScore);
+
+  return EXIT_SUCCESS;
+}
 
 void parseString(char* string, int* num1, int* num2){
   char delimiter[] = "   ";
@@ -13,21 +49,19 @@ void parseString(char* string, int* num1, int* num2){
   if (token != NULL) *num1 = atoi(token);
   token = strtok(NULL, delimiter);
   if (token != NULL) *num2 = atoi(token);
-
-  printf("%d %d\n", *num1, *num2);
 }
 
-int max(int* arr, int len){
+int max(int* arr, size_t len){
   int max = 0;
-  for (int i = 0; i < len; i++){
+  for (uint i = 0; i < len; i++){
     if (arr[i] > max) max = arr[i];
   }
   return max;
 }
 
-int* frequency(int* arr, int len){
+int* frequency(int* arr, size_t len){
   int* freqArr = (int*) malloc(sizeof(int) * (max(arr, len)+1));
-  for (int i = 0; i < len; i++){
+  for (uint i = 0; i < len; i++){
     freqArr[arr[i]] += 1;
   }
   return freqArr;
@@ -60,7 +94,7 @@ void mergeSort(int* arr, uint left, uint right){
   }
 }
 
-int getDistance(int* arr1, int* arr2, uint len){
+int getDistance(int* arr1, int* arr2, size_t len){
   int sum = 0;
   for (uint i = 0; i < len; i++){
     sum += (int) fabs((double) (arr1[i] - arr2[i]));
@@ -68,7 +102,7 @@ int getDistance(int* arr1, int* arr2, uint len){
   return sum;
 }
 
-int getSimilarityScore(int* arr1, int* arr2, int len){
+int getSimilarityScore(int* arr1, int* arr2, size_t len){
   int* freqArr = frequency(arr2, len);
   int sum = 0;
   for (uint i = 0; i < len; i++) {
@@ -76,32 +110,4 @@ int getSimilarityScore(int* arr1, int* arr2, int len){
   }
   free(freqArr);
   return sum;
-}
-
-int main(){
-  FILE* fptr;
-  fptr = fopen("./input.txt", "r");
-
-  char* input = (char*) malloc(sizeof(char)*KB);
-
-  size_t arrlen = 1000;
-  int num1[arrlen], num2[arrlen];
-  uint i = 0, j = 0; 
-
-  if (fptr != NULL){
-    while (fgets(input, KB, fptr)){
-      // puts(input);
-      if(i < arrlen && j < arrlen) parseString(input, &num1[i++], &num2[j++]);
-    }
-  } 
-  fclose(fptr);
-
-  mergeSort(num1, 0, i-1);
-  mergeSort(num2, 0, j-1);
-  int distance = getDistance(num1, num2, arrlen);
-  int similarityScore = getSimilarityScore(num1, num2, arrlen);
-  printf("Distance: %d\n", distance);
-  printf("Similarity Score: %d\n", similarityScore);
-
-  return EXIT_SUCCESS;
 }
